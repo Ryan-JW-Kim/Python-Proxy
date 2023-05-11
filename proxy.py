@@ -8,7 +8,6 @@ class ProxyParser:
 
     @staticmethod
     def test_proxy(proxy_dict):
-        
         try:
             ip = proxy_dict["IP Address"]
             response = requests.get(ProxyParser.default_test_url, proxies={"http": f"http://{ip}"}, timeout=30)
@@ -53,3 +52,49 @@ class ProxyParser:
                 f.write(f"{proxy['IP Address']}\n")
     
         return valid_proxies
+    
+    @staticmethod
+    def valid_proxy_generator(filename="raw_proxies.txt"):
+
+        proxies = ProxyParser.parse_raw(filename)
+
+        for proxy in proxies:
+            if ProxyParser.test_proxy(proxy):
+                yield proxy
+
+
+class ProxyBatch:
+
+    def __init__(self, proxies, urls, batch_size=10):
+        self.proxies = proxies
+        self.urls = urls
+        self.batch_size = batch_size
+
+    def execute_batch(self):
+
+        proxy_index = 0
+        batch_count = 0
+        data = {}
+        for url in self.urls:
+
+            if proxy_index >= len(self.proxies):
+                proxy_index = 0
+            
+            proxy = self.proxies[proxy_index]
+
+            try:
+                response = requests.get(url, proxies={"http": f"http://{proxy}"}, timeout=30)
+                data[url] = response.text
+
+            except Exception as e:
+                print(f"Error: {type(e)}")
+                data[url] = None
+
+            batch_count += 1
+            
+            if batch_count >= self.batch_size:
+                batch_count = 0
+                proxy_index += 1
+            
+            return data
+        
