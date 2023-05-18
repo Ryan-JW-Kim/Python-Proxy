@@ -42,12 +42,24 @@ class ProxyTools:
         try:
             ip = proxy_dict["IP Address"]
             port = proxy_dict["Port"]
-            response = requests.get(ProxyParser.default_test_url, proxies={"http": f"http://{ip}:{port}"}, timeout=3)
+            response = requests.get(ProxyTools.default_test_url, proxies={"http": f"http://{ip}:{port}"}, timeout=3)
 
-            if response.status_code in ProxyParser.valid_status_codes:
+            if response.status_code in ProxyTools.valid_status_codes:
                 print(f"Working Proxy: {ip}:{port}")
                 return True
 
         except Exception as e:
-            print(f"Error: {type(e)}")
+            print(f"Error: {e}")
             return False
+        
+    @staticmethod
+    def format_proxy(proxy_dict, https=False):
+        ip = proxy_dict["IP Address"]
+        port = proxy_dict["Port"]
+
+        proxy_dict = {"http": f"http://{ip}:{port}"}
+
+        if https:
+            proxy_dict["https"] = f"https://{ip}:{port}"
+
+        return proxy_dict
