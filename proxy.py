@@ -6,6 +6,9 @@ import json
 class FreeProxyList:
     free_proxy_list_key_mappings = ["IP Address", "Port", "Code", "Country", "Anonymity", "Google", "Https", "Last Checked"]
     def __init__(self, filename=None):
+        """
+        Tool for webscraping a list of free proxies.
+        """
 
         self.url = "https://free-proxy-list.net"
         self.html = requests.get(self.url).text
@@ -39,6 +42,25 @@ class ProxyTools:
 
     @staticmethod
     def test_proxy(proxy_dict):
+        """
+        Test Proxy with data stored in dictionary.
+        
+        Input: 
+            proxy_dict = {
+                "IP Address",
+                "Port",
+                "Code",
+                "Country",
+                "Anonymity",
+                "Google",
+                "Https",
+                "Last Checked"
+            }
+        
+        Output:
+            True if proxy is working, False if not.
+        """
+
         try:
             ip = proxy_dict["IP Address"]
             port = proxy_dict["Port"]
@@ -54,12 +76,31 @@ class ProxyTools:
         
     @staticmethod
     def format_proxy(proxy_dict, https=False):
+        """
+        Format a proxy dictionary into a dictionary that can be used by the requests library.
+
+        Input:
+            proxy_dict = {
+                "IP Address",
+                "Port",
+                "Code",
+                "Country",
+                "Anonymity",
+                "Google",
+                "Https",
+                "Last Checked"
+            }
+
+            https = True if you want to use the proxy for https requests.
+        """
         ip = proxy_dict["IP Address"]
         port = proxy_dict["Port"]
-
         proxy_dict = {"http": f"http://{ip}:{port}"}
 
         if https:
-            proxy_dict["https"] = f"https://{ip}:{port}"
+            if proxy_dict["Https"] == "yes":
+                proxy_dict["https"] = f"https://{ip}:{port}"
+            else:
+                print(f"Error: Proxy {ip}:{port} does not support HTTPS.")
 
         return proxy_dict
